@@ -85,8 +85,7 @@
 #define SID_A6  71
 #define SID_AS6 67
 #define SID_B6  63
-//To fast for 4-bit precision at 125kHz
-/*#define SID_C7  60
+#define SID_C7  60
 #define SID_CS7 56
 #define SID_D7  53
 #define SID_DS7 50
@@ -103,12 +102,13 @@
 #define SID_D8  27
 #define SID_DS8 25
 #define SID_E8  24
+//Too fast for pulse
 #define SID_F8  22
 #define SID_FS8 21
 #define SID_G8  20
 #define SID_GS8 19
 #define SID_A8  18
 #define SID_AS8 17
-#define SID_B8  16*/
+#define SID_B8  16
 
 #endif
