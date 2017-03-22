@@ -1,4 +1,4 @@
-#include "SoundInterfaceDevice.h"
+#include "note.h"
 
 #define SWEEP_SPEED(x) (1 << x) - 1
 
@@ -44,12 +44,7 @@ oscillator *channels[NUMBER_OF_CHANNELS] =
 
 uint16_t seed = 0xD1CE5EED;
 
-void set_noise_seed(uint16_t s)
-{
-  seed = s;
-}
-
-uint8_t get_noise()
+inline uint8_t get_noise()
 {
   uint8_t r = seed & 0x0001;
   seed >>= 1;
@@ -153,18 +148,14 @@ void setup()
 
   noInterrupts();
 
-  pinMode(3, OUTPUT);
+  //set pins 0 to 7 as outputs
+  DDRD = 0x11111111;
   
   //CTC mode => 31250Hz sample recalculation
-  TCCR1A = 0x00;
-  TCCR1B = _BV(WGM12) | _BV(CS10);
-  OCR1A = 511;
-  TIMSK1 = _BV(OCIE1A);
-
-  //7-bit audio output precision => 125kHz PWM frequency
-  TCCR2A = _BV(COM2B1) | _BV(WGM21) | _BV(WGM20);
-  TCCR2B = _BV(WGM22) | _BV(CS20);
-  OCR2A = 127;
+  TCCR2A = _BV(WGM21);
+  TCCR2A = _BV(CS21);
+  OCR2A = 7;
+  TIMSK2 = _BV(OCIE2A);
   
   interrupts();
 
@@ -180,9 +171,9 @@ void setup()
 
 uint16_t counter = 1;
 
-ISR(TIMER1_COMPA_vect)
+ISR(TIMER2_COMPA_vect)
 {
-  OCR2B = 0;
+  PORTD &= 0x10000000;
   
   for (uint8_t i = 0; i < NUMBER_OF_SQUARES; ++i)
   {
@@ -204,16 +195,10 @@ ISR(TIMER1_COMPA_vect)
           squares[i].sweep_shift = 0;
           squares[i].sweep_speed = 0;
         }
-        else if (squares[i].sweep_direction)
-        {
-          squares[i].note -= sweep;
-        }
-        else
-        {
-          squares[i].note += sweep;
-        }
+        squares[i].note += squares[i].sweep_direction * sweep;
+        
       }
-      OCR2B += squares[i].sample[squares[i].index & squares[i].sample_length] ? squares[i].volume : 0;
+      PORTD += squares[i].sample[squares[i].index & squares[i].sample_length] ? squares[i].volume : 0;
     }
   }
 
@@ -235,16 +220,9 @@ ISR(TIMER1_COMPA_vect)
         triangle.sweep_shift = 0;
         triangle.sweep_speed = 0;
       }
-      else if (triangle.sweep_direction)
-      {
-        triangle.note -= sweep;
-      }
-      else
-      {
-        triangle.note += sweep;
-      }
+      triangle.note += triangle.sweep_direction * sweep;
     }
-    OCR2B += triangle.sample[triangle.index & triangle.sample_length] >> (3 - (triangle.volume >> 2));
+    PORTD += triangle.sample[triangle.index & triangle.sample_length] >> (3 - (triangle.volume >> 2));
   }
 
   if ((sawtooth.note >= 64) && (sawtooth.note <= SID_C0))
@@ -265,16 +243,9 @@ ISR(TIMER1_COMPA_vect)
         sawtooth.sweep_shift = 0;
         sawtooth.sweep_speed = 0;
       }
-      else if (sawtooth.sweep_direction)
-      {
-        sawtooth.note -= sweep;
-      }
-      else
-      {
-        sawtooth.note += sweep;
-      }
+      sawtooth.note += sawtooth.sweep_direction * sweep;
     }
-    OCR2B += sawtooth.sample[sawtooth.index & sawtooth.sample_length] >> (3 - (sawtooth.volume >> 2));
+    PORTD += sawtooth.sample[sawtooth.index & sawtooth.sample_length] >> (3 - (sawtooth.volume >> 2));
   }
 
   if (noise.note)
@@ -286,7 +257,7 @@ ISR(TIMER1_COMPA_vect)
       noise.index = get_noise();
     }
     
-    OCR2B += noise.index ? 0 : noise.volume;
+    PORTD += noise.index ? 0 : noise.volume;
   }
   
   /*
@@ -300,7 +271,7 @@ ISR(TIMER1_COMPA_vect)
         channels[i].frequency += channels[i].note;
         channels[i].index++;
       }
-      OCR2B += channels[i].sample[channels[i].index & channels[i].sample_length];
+      PORTD += channels[i].sample[channels[i].index & channels[i].sample_length];
     }
   }*/
 
@@ -327,7 +298,7 @@ const static uint16_t melody[NUMBER_OF_CHANNELS][MELODY_LENGTH] PROGMEM =
   {SID_GS3, 0, SID_GS3, 0, SID_FS4, 0, SID_GS3, 0, SID_DS4, 0, SID_GS3, 0, SID_CS4, 0, SID_GS3, 0, 0, 0, SID_GS3, 0, SID_FS4, 0, SID_GS3, 0, SID_DS4, 0, SID_GS3, 0, SID_CS4, 0, SID_GS3, 0, SID_GS3, 0, SID_GS3, 0, SID_FS4, 0, SID_GS3, 0, SID_DS4, 0, SID_GS3, 0, SID_CS4, 0, SID_GS3, 0, 0, 0, SID_GS3, 0, SID_FS4, 0, SID_GS3, 0, SID_DS4, 0, SID_GS3, 0, SID_CS4, 0, SID_GS3, 0, SID_GS3, 0, SID_GS3, 0, SID_FS4, 0, SID_GS3, 0, SID_DS4, 0, SID_GS3, 0, SID_CS4, 0, SID_GS3, 0, 0, 0, SID_GS3, 0, SID_FS4, 0, SID_GS3, 0, SID_DS4, 0, SID_GS3, 0, SID_CS4, 0, SID_GS3, 0, SID_GS3, 0, SID_GS3, 0, SID_FS4, 0, SID_GS3, 0, SID_DS4, 0, SID_GS3, 0, SID_CS4, 0, SID_GS3, 0, 0, 0, SID_GS3, 0, SID_AS3, 0, SID_GS3, 0, SID_B4, 0, SID_AS4, 0, SID_GS4, 0, SID_FS4, 0},
   {},
   {},
-  {},//{SID_GS3, 0, SID_GS3, 0, SID_GS3, 0, SID_GS3, 0, },
+  {0},//{SID_GS3, 0, SID_GS3, 0, SID_GS3, 0, SID_GS3, 0, },
   {},
   {2000, 0, 2000, 0, 700, 0, 2000, 0, 0, 0, 2000, 0, 700, 0, 2000, 0, 0, 0, 2000, 0, 700, 0, 2000, 0, 2000, 0, 2000, 0, 700, 0, 2000, 0, 2000, 0, 2000, 0, 700, 0, 2000, 0, 0, 0, 2000, 0, 700, 0, 2000, 0, 0, 0, 2000, 0, 700, 0, 2000, 0, 2000, 0, 2000, 0, 700, 0, 2000, 0, 2000, 0, 2000, 0, 700, 0, 2000, 0, 0, 0, 2000, 0, 700, 0, 2000, 0, 0, 0, 2000, 0, 700, 0, 2000, 0, 2000, 0, 2000, 0, 700, 0, 2000, 0, 2000, 0, 2000, 0, 700, 0, 2000, 0, 0, 0, 2000, 0, 700, 0, 2000, 0, 0, 0, 2000, 0, 700, 0, 2000, 0, 2000, 0, 2000, 0, 700, 0, 2000, 0},
   {}
@@ -338,6 +309,7 @@ uint16_t i = 0;
 
 void loop()
 {
+  squares[1].note = SID_A4;
   triangle.volume = 15;
   noise.volume = 12;
   squares[0].volume = 11;
@@ -353,10 +325,12 @@ void loop()
   squares[1].note = 0;
   delay(15);
   noise.note = 0;
-  delay(50);
+  delay(45);
   
   melody_i = (melody_i + 1) % MELODY_LENGTH;
 }
+
+
 
 
 
