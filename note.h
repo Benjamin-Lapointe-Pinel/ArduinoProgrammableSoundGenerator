@@ -102,7 +102,6 @@
 #define SID_D8  27
 #define SID_DS8 25
 #define SID_E8  24
-//Too fast for pulse
 #define SID_F8  22
 #define SID_FS8 21
 #define SID_G8  20
