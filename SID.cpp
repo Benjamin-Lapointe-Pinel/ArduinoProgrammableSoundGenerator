@@ -38,7 +38,7 @@ void init_SID()
   init_sample_oscillator(sample, NULL, 0);
 }
 
-uint16_t seed = 0xD1CE5EED;
+uint16_t seed = 0xD1CE5EF3;
 uint16_t get_noise()
 {
   uint16_t r = seed & 0x0001;
@@ -104,11 +104,23 @@ void init_sawtooth_oscillator(struct oscillator& o)
   o.sample_speed = SAMPLE_SPEED(o.sample_length);
   o.sample = new uint8_t[o.sample_length];
   o.sample_length--;
-
-  for (int i = 0; i < o.sample_length; i++)
-  {
-    o.sample[i] = i;
-  }
+  
+  o.sample[0]   = 0;
+  o.sample[1]   = 1;
+  o.sample[2]   = 2;
+  o.sample[3]   = 3;
+  o.sample[4]   = 4;
+  o.sample[5]   = 5;
+  o.sample[6]   = 6;
+  o.sample[7]   = 7;
+  o.sample[8]   = 8;
+  o.sample[9]   = 9;
+  o.sample[10]  = 10;
+  o.sample[11]  = 11;
+  o.sample[12]  = 12;
+  o.sample[13]  = 13;
+  o.sample[14]  = 14;
+  o.sample[15]  = 15;
 }
 
 void init_noise_oscillator(struct oscillator& o)
