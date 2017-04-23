@@ -14,11 +14,13 @@ uint8_t melody_i = 0;
 
 void loop()
 {
-  /*sawtooth.note = SID_C0;
-  sawtooth.sweep_direction = SWEEP_UP;
-  sawtooth.sweep_shift = 4;
-  sawtooth.sweep_speed = SWEEP_SPEED(9);
-  delay(10000);*/
+  /*noise.note = SID_C0;
+  noise.sweep_direction = SWEEP_UP;
+  noise.sweep_shift = 4;
+  noise.sweep_speed = SWEEP_SPEED(9);
+  delay(2000);*/
+
+  
   noise.volume = 12;
   set_square_duty_cycle(squares[1], 2);
   
@@ -34,4 +36,5 @@ void loop()
   delay(50);
   
   melody_i = (melody_i + 1) % MELODY_LENGTH;
+  
 }

@@ -52,7 +52,7 @@ void init_noise_oscillator(struct oscillator& o);
 void init_sample_oscillator(struct oscillator& o, uint8_t s[], uint8_t sl);
 void init_sample_oscillator(struct oscillator& o, uint8_t s[], uint8_t sl, uint16_t sample_speed);
 void set_square_duty_cycle(struct oscillator& o, uint8_t duty_cycle);
-uint16_t get_noise();
+uint8_t get_noise();
 void copy_channel_sound(struct oscillator& source, struct oscillator& copy);
 void silence();
 
