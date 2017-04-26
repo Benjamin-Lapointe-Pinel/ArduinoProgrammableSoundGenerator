@@ -1,4 +1,4 @@
-#include "SID.h"
+#include "APSG.h"
 
 oscillator squares[NUMBER_OF_SQUARES];
 oscillator triangle;
@@ -54,7 +54,7 @@ void init_SID()
   init_triangle_oscillator(triangle);
   init_sawtooth_oscillator(sawtooth);
   init_noise_oscillator(noise);
-  init_sample_oscillator(sample, NULL, 0);
+  init_sample_oscillator(sample, {0}, 1);
 
   interrupts();
 }

@@ -1,5 +1,5 @@
-#ifndef SID_H
-#define SID_H
+#ifndef APSG_H
+#define APSG_H
 
 #include <Arduino.h>
 #include "note.h"
