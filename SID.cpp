@@ -15,6 +15,27 @@ oscillator *channels[NUMBER_OF_CHANNELS] =
   &sample
 };
 
+
+
+//TODO: -> (and rename parameter!)
+void update_channel(struct oscillator& o, uint16_t c)
+{
+  if ((o.note >= o.sample_speed) && (o.note <= SID_C0))
+  {
+    o.frequency -= o.sample_speed;
+    if (o.frequency < 0)
+    {
+      o.frequency += o.note;
+      o.index++;
+    }
+    if ((o.sweep_shift) && !(c & o.sweep_speed))
+    {
+      uint16_t sweep = o.note >> o.sweep_shift;
+      o.note += sweep * o.sweep_direction;
+    }
+  }
+}
+
 void init_SID()
 {
   noInterrupts();
@@ -25,8 +46,6 @@ void init_SID()
   TCCR2B = _BV(WGM22) | _BV(CS20);
   OCR2A = 0x7f; //7-bit precision => 125kHz PWM frequency
   TIMSK2 = _BV(TOIE2);
-  
-  interrupts();
 
   for (uint8_t i = 0; i < NUMBER_OF_SQUARES; ++i)
   {
@@ -36,14 +55,17 @@ void init_SID()
   init_sawtooth_oscillator(sawtooth);
   init_noise_oscillator(noise);
   init_sample_oscillator(sample, NULL, 0);
+
+  interrupts();
 }
 
-uint32_t seed = 0xD1CE5EF3;
+uint32_t seed = 0xD1CE5EED;
 void set_noise_seed(uint32_t s)
 {
   seed = s;
 }
 
+//TODO inline? Optimisation voulu peut-être?...
 uint8_t get_noise()
 {
   uint32_t r = seed & 0x00000001;
@@ -149,7 +171,8 @@ void init_sample_oscillator(struct oscillator& o, uint8_t s[], uint8_t sl, uint1
   o.sample_length = sl;
   o.sample_speed = sample_speed;
   o.sample = new uint8_t[o.sample_length];
-  
+
+  //Useless maybe? Pointer maybe?
   for (uint8_t i = 0; i < o.sample_length; ++i)
   {
     o.sample[i] = s[i];
@@ -204,7 +227,7 @@ ISR(TIMER2_OVF_vect)
             uint16_t sweep = squares[i].note >> squares[i].sweep_shift;
             squares[i].note += sweep * squares[i].sweep_direction;
           }
-          steps[wave] += squares[i].sample[squares[i].index & squares[i].sample_length] ? squares[i].volume : 0;
+          steps[wave] += squares[i].sample[squares[i].index & squares[i].sample_length] ? squares[i].volume : 0; // Tester le volume comme une division entière pour voir la rapidité. Ou un shift << >>
         }
       }
       break;

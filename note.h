@@ -1,6 +1,11 @@
 #ifndef NOTE_H
 #define NOTE_H
 
+/**
+ * SID_NOTE = (SID_frequency / 2) / real_frequency
+ * SID_A4 = (125000 / 2) / 440 = 142.045 = 142
+**/
+
 #define SID_C0  3823
 #define SID_CS0 3609
 #define SID_D0  3406

@@ -1,6 +1,17 @@
 #include "SID.h"
 #include "melodies.h"
 
+//TODO: rename SID for Arduino PSG? APSG?
+
+//http://nesdev.com/NESSOUND.txt
+//http://www.slack.net/~ant/nes-emu/apu_ref.txt
+
+
+//TODO : je n'ai pas de génération d'envelope https://wiki.nesdev.com/w/index.php/APU_Envelope
+//TODO: traiter tous les channels comme le sample!
+//(sauf peut-être le noise, mais encore là... il pourrait avoir une très grande table de noise en mémoire... entk)
+// C'est sur qu'il y aurait surement une perte de controle sur le volume
+
 void setup()
 {
   Serial.begin(9600);
@@ -13,12 +24,14 @@ void setup()
 uint8_t melody_i = 0;
 
 void loop()
-{
+{  
   /*noise.note = SID_C0;
   noise.sweep_direction = SWEEP_UP;
   noise.sweep_shift = 4;
   noise.sweep_speed = SWEEP_SPEED(9);
   delay(2000);*/
+
+  //sample.note = SID_A4;
 
   
   noise.volume = 12;
