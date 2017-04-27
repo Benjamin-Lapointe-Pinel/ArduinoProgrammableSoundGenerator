@@ -4,8 +4,7 @@
 #include <Arduino.h>
 #include "note.h"
 
-#define SAMPLE_SPEED(x) x * 4 // Pourrait être plus gros pour améliorer la précision des notes et générer encore plus aigu?
-//Si on remets les notes sur 32 bits, on pourrait gagner plusieurs octaves d'aigu! Baisse de Performance?...
+#define SAMPLE_SPEED(x) x * 4
 #define SWEEP_SPEED(x) (1 << x) - 1
 const static int8_t SWEEP_DOWN  = 1;
 const static int8_t SWEEP_UP    = -1;
@@ -55,6 +54,7 @@ void init_sample_oscillator(struct oscillator& o, uint8_t s[], uint8_t sl, uint1
 void set_square_duty_cycle(struct oscillator& o, uint8_t duty_cycle);
 uint8_t get_noise();
 void copy_channel_sound(struct oscillator& source, struct oscillator& copy);
+void update_channel(struct oscillator& o);
 void silence();
 
 #endif

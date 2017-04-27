@@ -17,24 +17,6 @@ oscillator *channels[NUMBER_OF_CHANNELS] =
 
 
 
-//TODO: -> (and rename parameter!)
-void update_channel(struct oscillator& o, uint16_t c)
-{
-  if ((o.note >= o.sample_speed) && (o.note <= SID_C0))
-  {
-    o.frequency -= o.sample_speed;
-    if (o.frequency < 0)
-    {
-      o.frequency += o.note;
-      o.index++;
-    }
-    if ((o.sweep_shift) && !(c & o.sweep_speed))
-    {
-      uint16_t sweep = o.note >> o.sweep_shift;
-      o.note += sweep * o.sweep_direction;
-    }
-  }
-}
 
 void init_SID()
 {
@@ -201,75 +183,37 @@ void silence()
   }
 }
 
-uint8_t steps[3] = {0};
-uint16_t wave = 0;
 uint16_t counter = 0;
-
+uint8_t steps = 0;
 ISR(TIMER2_OVF_vect)
 {
-  switch (wave)
+  switch (counter++ & 3)
   {
-    case 0:
-      steps[wave] = 0;
-      
+    case 0:      
       for (uint8_t i = 0; i < NUMBER_OF_SQUARES; ++i)
       {
-        if ((squares[i].note >= squares[i].sample_speed) && (squares[i].note <= SID_C0))
+        if ((squares[i].note >= squares[i].sample_speed) && (squares[i].note <= N_C0))
         {
-          squares[i].frequency -= squares[i].sample_speed;
-          if (squares[i].frequency < 0)
-          {
-            squares[i].frequency += squares[i].note;
-            squares[i].index++;
-          }
-          if ((squares[i].sweep_shift) && !(counter & squares[i].sweep_speed))
-          {
-            uint16_t sweep = squares[i].note >> squares[i].sweep_shift;
-            squares[i].note += sweep * squares[i].sweep_direction;
-          }
-          steps[wave] += squares[i].sample[squares[i].index & squares[i].sample_length] ? squares[i].volume : 0; // Tester le volume comme une division entière pour voir la rapidité. Ou un shift << >>
+          update_channel(squares[i]);
+          steps += squares[i].sample[squares[i].index & squares[i].sample_length] ? squares[i].volume : 0; // Tester le volume comme une division entière pour voir la rapidité. Ou un shift << >>
         }
       }
       break;
     case 1:
-      steps[wave] = 0;
-      
-      if ((triangle.note >= triangle.sample_speed) && (triangle.note <= SID_C0))
+      if ((triangle.note >= triangle.sample_speed) && (triangle.note <= N_C0))
       {
-        triangle.frequency -= triangle.sample_speed;
-        if (triangle.frequency < 0)
-        {
-          triangle.frequency += triangle.note;
-          triangle.index++;
-        }
-        if ((triangle.sweep_shift) && !(counter & triangle.sweep_speed))
-        {
-          uint16_t sweep = triangle.note >> triangle.sweep_shift;
-          triangle.note += sweep * triangle.sweep_direction;
-        }
-        steps[wave] += triangle.sample[triangle.index & triangle.sample_length] >> (3 - (triangle.volume >> 2));
+        update_channel(triangle);
+        steps += triangle.sample[triangle.index & triangle.sample_length] >> (3 - (triangle.volume >> 2));
       }
     
-      if ((sawtooth.note >= sawtooth.sample_speed) && (sawtooth.note <= SID_C0))
+      if ((sawtooth.note >= sawtooth.sample_speed) && (sawtooth.note <= N_C0))
       {
-        sawtooth.frequency -= sawtooth.sample_speed;
-        if (sawtooth.frequency < 0)
-        {
-          sawtooth.frequency += sawtooth.note;
-          sawtooth.index++;
-        }
-        if ((sawtooth.sweep_shift) && !(counter & sawtooth.sweep_speed))
-        {
-          uint16_t sweep = sawtooth.note >> sawtooth.sweep_shift;
-          sawtooth.note += sweep * sawtooth.sweep_direction;
-        }
-        steps[wave] += sawtooth.sample[sawtooth.index & sawtooth.sample_length] >> (3 - (sawtooth.volume >> 2));
+        update_channel(sawtooth);
+        steps += sawtooth.sample[sawtooth.index & sawtooth.sample_length] >> (3 - (sawtooth.volume >> 2));
       }
       break;
     case 2:
-      steps[wave] = 0;
-      
-      if ((noise.note >= noise.sample_speed) && (noise.note <= SID_C0))
+      if ((noise.note >= noise.sample_speed) && (noise.note <= N_C0))
       {
         noise.frequency -= noise.sample_speed;
         if (noise.frequency < 0)
@@ -282,37 +226,35 @@ ISR(TIMER2_OVF_vect)
           uint16_t sweep = noise.note >> noise.sweep_shift;
           noise.note += sweep * noise.sweep_direction;
         }
-        steps[wave] += noise.index ? 0 : noise.volume;
+        steps += noise.index ? 0 : noise.volume;
       }
 
-      if ((sample.sample_length) && (sample.note >= sample.sample_speed) && (sample.note <= SID_C0))
+      if ((sample.sample_length) && (sample.note >= sample.sample_speed) && (sample.note <= N_C0))
       {
-        sample.frequency -= sample.sample_speed;
-        if (sample.frequency < 0)
-        {
-          sample.frequency += sample.note;
-          sample.index++;
-        }
-        if ((sample.sweep_shift) && !(counter & sample.sweep_speed))
-        {
-          uint16_t sweep = sample.note >> sample.sweep_shift;
-          sample.note += sweep * sample.sweep_direction;
-        }
-        steps[wave] += sample.sample[sample.index & sample.sample_length];
+        update_channel(sample);
+        steps += sample.sample[sample.index & sample.sample_length];
       }
       break;
     case 3:
-      OCR2B = 0;
-      for (int i = 0; i < wave; i++)
-      {
-        OCR2B += steps[i];
-      }
-
-      counter++;
-      wave = -1;
+      OCR2B = steps;
+      steps = 0;
       break;
   }
-  wave++;
+}
+
+void update_channel(struct oscillator& o)
+{
+    o.frequency -= o.sample_speed;
+    if (o.frequency < 0)
+    {
+      o.frequency += o.note;
+      o.index++;
+    }
+    if ((o.sweep_shift) && !(counter >> 2 & o.sweep_speed))
+    {
+      uint16_t sweep = o.note >> o.sweep_shift;
+      o.note += sweep * o.sweep_direction;
+    }
 }
 
 
