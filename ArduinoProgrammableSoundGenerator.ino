@@ -14,7 +14,7 @@ void loop()
   //sampleTest();
   //sweepTest();
   //scaleSequence();
-  //melodyExample();
+  melodyExample();
 }
 
 
@@ -35,14 +35,14 @@ void melodyExample()
    * sample     = channels[5]
    */
   
-  uint8_t melody_i = 0;
+  int melody_i = 0;
 
   noise.volume = 12;
   set_square_duty_cycle(squares[1], 2);
 
   while (true)
   {
-    for (uint8_t i = 0; i < NUMBER_OF_CHANNELS; ++i)
+    for (int i = 0; i < NUMBER_OF_CHANNELS; ++i)
     {
       channels[i]->note = pgm_read_word(&melody[i][melody_i]); //Read melody from PROGMEM (melodies.h)
     }
@@ -74,17 +74,17 @@ uint16_t debug_array[] =
 
 void scaleSequence()
 {
-  for (uint8_t i = 0; i < NUMBER_OF_CHANNELS; ++i)
+  for (int i = 0; i < NUMBER_OF_CHANNELS; ++i)
   {
-    for (uint8_t j = 0; j < 71; ++j)
+    for (int j = 0; j < 71; ++j)
     {
       channels[i]->note = debug_array[j];
       delay(200);
     }
   }
-  for (uint8_t j = 0; j < 71; ++j)
+  for (int j = 0; j < 71; ++j)
   {
-    for (uint8_t i = 0; i < NUMBER_OF_CHANNELS; ++i)
+    for (int i = 0; i < NUMBER_OF_CHANNELS; ++i)
     {      
       channels[i]->note = debug_array[j];
     }
@@ -126,12 +126,12 @@ void sampleTest()
 
 void sweepTest()
 {
-  for (uint8_t i = 0; i < NUMBER_OF_CHANNELS; ++i)
+  for (int i = 0; i < NUMBER_OF_CHANNELS; ++i)
   {
     channels[i]->sweep_direction = SWEEP_DOWN;
     channels[i]->sweep_shift = 1;
     channels[i]->sweep_speed = SWEEP_SPEED(8);
-    for (uint8_t j = 0; j < 71; ++j)
+    for (int j = 0; j < 71; ++j)
     {
       channels[i]->note = debug_array[j];
       delay(200);
