@@ -1,68 +1,64 @@
 #include "APSG.h"
 #include "melodies.h"
 
-//http://nesdev.com/NESSOUND.txt
-//http://www.slack.net/~ant/nes-emu/apu_ref.txt
-
-
-//TODO : je n'ai pas de génération d'envelope https://wiki.nesdev.com/w/index.php/APU_Envelope
-//TODO: traiter tous les channels comme le sample!
-//(sauf peut-être le noise, mais encore là... il pourrait avoir une très grande table de noise en mémoire... entk)
-// C'est sur qu'il y aurait surement une perte de controle sur le volume
-
 void setup()
 {
   Serial.begin(9600);
-  init_SID();
-
-  uint8_t sin_wave[16] = {8,10,13,14,15,14,13,10,8,5,2,1,0,1,2,5};
-  init_sample_oscillator(sample, sin_wave, 16);
+  init_SID(); //Output on pin 3
 }
-
-uint8_t melody_i = 0;
 
 void loop()
 {
+  //Each line is an example. Uncomment accordingly
+  
+  //sampleTest();
+  //sweepTest();
+  //scaleSequence();
+  //melodyExample();
+}
+
+
+
+
+
+
+
+
+void melodyExample()
+{
+  /*
+   * squares[0] = channels[0]
+   * squares[1] = channels[1]
+   * triangle   = channels[2]
+   * sawtooth   = channels[3]
+   * noise      = channels[4]
+   * sample     = channels[5]
+   */
+  
+  uint8_t melody_i = 0;
+
   noise.volume = 12;
   set_square_duty_cycle(squares[1], 2);
-  
-  for (uint8_t i = 0; i < NUMBER_OF_CHANNELS; ++i)
+
+  while (true)
   {
-    //Read melody from PROGMEM
-    channels[i]->note = pgm_read_word(&melody[i][melody_i]);
-  }
-
-  //Cut square2 and noise short
-  delay(35);
-  squares[1].note = 0;
-  delay(15);
-  noise.note = 0;
-  delay(50);
+    for (uint8_t i = 0; i < NUMBER_OF_CHANNELS; ++i)
+    {
+      channels[i]->note = pgm_read_word(&melody[i][melody_i]); //Read melody from PROGMEM (melodies.h)
+    }
   
-  melody_i = (melody_i + 1) % MELODY_LENGTH;
+    //Cut square2 and noise short
+    delay(35);
+    squares[1].note = N_NOP;
+    delay(15);
+    noise.note = N_NOP;
+    delay(50);
+    
+    melody_i = (melody_i + 1) % MELODY_LENGTH;
+  }
 }
 
-
-//****************************** DEBUG ******************************//
-void sampleTest()
-{
-  uint8_t sin_wave[16] = {8,10,13,14,15,14,13,10,8,5,2,1,0,1,2,5};
-  init_sample_oscillator(sample, sin_wave, 16);
-
-  sample.note = N_A4;
-  delay(2000);
-}
-
-void sweepTest()
-{
-  triangle.sweep_direction = SWEEP_DOWN;
-  triangle.sweep_shift = 1;
-  triangle.sweep_speed = SWEEP_SPEED(7);
-
-  triangle.note = N_C5;
-  delay(2000);
-}
-
+/****************************** DEBUG ******************************/
 
 uint16_t debug_array[] =
 {
@@ -76,7 +72,7 @@ uint16_t debug_array[] =
   N_C7, N_D7, N_E7, N_F7, N_G7, N_A7, N_B7, N_NOP
 };
 
-void debug()
+void scaleSequence()
 {
   for (uint8_t i = 0; i < NUMBER_OF_CHANNELS; ++i)
   {
@@ -95,6 +91,59 @@ void debug()
     delay(200);
   }
 }
+
+void sampleTest()
+{
+  /*
+  15|            ---
+  14|         ---   ---
+  13|      ---         ---
+  12|                     
+  11|                     
+  10|   ---               ---
+   9|                        
+   7|                           
+   6|                           
+   8|---                     ---
+   5|                           ---               ---
+   4|                              
+   3|                              
+   2|                              ---         ---
+   1|                                 ---   ---
+   0|                                    ---
+    |________________________________________________
+      0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15
+  */
+  uint8_t sin_wave[16] = {8, 10, 13, 14, 15, 14, 13, 10, 8, 5, 2, 1, 0, 1, 2, 5};
+  init_sample_oscillator(sample, sin_wave, 16);
+
+  while (true)
+  {
+    sample.note = N_A4;
+    delay(100);
+  }
+}
+
+void sweepTest()
+{
+  for (uint8_t i = 0; i < NUMBER_OF_CHANNELS; ++i)
+  {
+    channels[i]->sweep_direction = SWEEP_DOWN;
+    channels[i]->sweep_shift = 1;
+    channels[i]->sweep_speed = SWEEP_SPEED(8);
+    for (uint8_t j = 0; j < 71; ++j)
+    {
+      channels[i]->note = debug_array[j];
+      delay(200);
+    }
+    channels[i]->sweep_direction = SWEEP_NOP;
+    channels[i]->sweep_shift = 0;
+    channels[i]->sweep_speed = SWEEP_SPEED(0);
+  }
+  //megaman quickman laser beam (are those really sweeps?)
+}
+
+
 
 
 

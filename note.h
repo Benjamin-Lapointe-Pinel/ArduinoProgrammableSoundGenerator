@@ -2,8 +2,8 @@
 #define NOTE_H
 
 /**
- * SID_NOTE = (SID_frequency / 2) / real_frequency
- * SID_A4 = (125000 / 2) / 440 = 142.045 = 142
+ * N_NOTE = (APSG_frequency / 2) / real_frequency
+ * N_A4   = (125000 / 2) / 440 = 142.045 = 142
 **/
 
 #define N_C0  3823
@@ -102,6 +102,28 @@
 #define N_A7  18
 #define N_AS7 17
 #define N_B7  16
+
+//Non precise enough
+#define N_C8  15
+#define N_CS8 14
+#define N_D8  13
+#define N_DS8 13
+#define N_E8  12
+#define N_F8  11
+#define N_FS8 11
+#define N_G8  10
+#define N_GS8 9
+#define N_A8  9
+#define N_AS8 8
+#define N_B8  8
+
 #define N_NOP 0
+#define N_MAX N_C0
+#define N_MIN N_B7
+//NES APU max pitch is C11... what a shame...
+//Si le son était mixé hardware (avec les pins)
+//Au lieu de software (avec un pwm)
+//On pourrait surement acceléré d'un certain cran
+//La génération de son et ainsi attaindre des octaves plus haut
 
 #endif

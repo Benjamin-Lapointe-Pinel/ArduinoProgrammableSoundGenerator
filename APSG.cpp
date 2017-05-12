@@ -1,3 +1,13 @@
+//http://nesdev.com/NESSOUND.txt
+//http://www.slack.net/~ant/nes-emu/apu_ref.txt
+//http://www.nesdev.com/2A03%20technical%20reference.txt
+
+
+//TODO : je n'ai pas de génération d'envelope https://wiki.nesdev.com/w/index.php/APU_Envelope
+//TODO: traiter tous les channels comme le sample!
+//(sauf peut-être le noise, mais encore là... il pourrait avoir une très grande table de noise en mémoire... entk)
+// C'est sur qu'il y aurait surement une perte de controle sur le volume
+
 #include "APSG.h"
 
 oscillator squares[NUMBER_OF_SQUARES];
@@ -27,7 +37,7 @@ void init_SID()
   TCCR2A =  _BV(COM2B1) | _BV(WGM20);
   TCCR2B = _BV(WGM22) | _BV(CS20);
   OCR2A = 0x7f; //7-bit precision => 125kHz PWM frequency
-  TIMSK2 = _BV(TOIE2);
+  TIMSK2 = _BV(TOIE2); //enable interrupts on TIMER2 overflow
 
   for (uint8_t i = 0; i < NUMBER_OF_SQUARES; ++i)
   {
@@ -36,7 +46,7 @@ void init_SID()
   init_triangle_oscillator(triangle);
   init_sawtooth_oscillator(sawtooth);
   init_noise_oscillator(noise);
-  init_sample_oscillator(sample, {0}, 1);
+  init_sample_oscillator(sample, {0}, 1); //Bug si mal initialisé...
 
   interrupts();
 }
@@ -47,7 +57,7 @@ void set_noise_seed(uint32_t s)
   seed = s;
 }
 
-//TODO inline? Optimisation voulu peut-être?...
+//TODO inline? Optimisation voulu peut-être?... define?
 uint8_t get_noise()
 {
   uint32_t r = seed & 0x00000001;
@@ -192,23 +202,19 @@ ISR(TIMER2_OVF_vect)
     case 0:      
       for (uint8_t i = 0; i < NUMBER_OF_SQUARES; ++i)
       {
-        if ((squares[i].note >= squares[i].sample_speed) && (squares[i].note <= N_C0))
+        if (update_channel(squares[i]))
         {
-          update_channel(squares[i]);
           steps += squares[i].sample[squares[i].index & squares[i].sample_length] ? squares[i].volume : 0; // Tester le volume comme une division entière pour voir la rapidité. Ou un shift << >>
         }
       }
       break;
     case 1:
-      if ((triangle.note >= triangle.sample_speed) && (triangle.note <= N_C0))
+      if (update_channel(triangle))
       {
-        update_channel(triangle);
         steps += triangle.sample[triangle.index & triangle.sample_length] >> (3 - (triangle.volume >> 2));
       }
-    
-      if ((sawtooth.note >= sawtooth.sample_speed) && (sawtooth.note <= N_C0))
+      if (update_channel(sawtooth))
       {
-        update_channel(sawtooth);
         steps += sawtooth.sample[sawtooth.index & sawtooth.sample_length] >> (3 - (sawtooth.volume >> 2));
       }
       break;
@@ -228,10 +234,8 @@ ISR(TIMER2_OVF_vect)
         }
         steps += noise.index ? 0 : noise.volume;
       }
-
-      if ((sample.sample_length) && (sample.note >= sample.sample_speed) && (sample.note <= N_C0))
+      if (update_channel(sample))
       {
-        update_channel(sample);
         steps += sample.sample[sample.index & sample.sample_length];
       }
       break;
@@ -242,19 +246,29 @@ ISR(TIMER2_OVF_vect)
   }
 }
 
-void update_channel(struct oscillator& o)
+//TODO inline? Optimisation voulu peut-être?... define?
+bool update_channel(struct oscillator& o)
 {
+  if ((o.note >= o.sample_speed) && (o.note <= N_C0))
+  {
+    //Sound generation
     o.frequency -= o.sample_speed;
     if (o.frequency < 0)
     {
       o.frequency += o.note;
       o.index++;
     }
+  
+    //Sweep generation
     if ((o.sweep_shift) && !(counter >> 2 & o.sweep_speed))
     {
       uint16_t sweep = o.note >> o.sweep_shift;
       o.note += sweep * o.sweep_direction;
     }
+
+    return true;
+  }
+  return false;
 }
 
 

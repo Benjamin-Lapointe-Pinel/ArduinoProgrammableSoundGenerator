@@ -4,9 +4,10 @@
 #include <Arduino.h>
 #include "note.h"
 
-#define SAMPLE_SPEED(x) x * 4
+#define SAMPLE_SPEED(x) x * 4 //Il serait peut-être possible d'optimiser la vitesse des aigu ici (et recalculer les notes ainsi)
 #define SWEEP_SPEED(x) (1 << x) - 1
 const static int8_t SWEEP_DOWN  = 1;
+const static int8_t SWEEP_NOP   = 0;
 const static int8_t SWEEP_UP    = -1;
 
 const static uint8_t NUMBER_OF_SQUARES    = 2;
@@ -54,7 +55,7 @@ void init_sample_oscillator(struct oscillator& o, uint8_t s[], uint8_t sl, uint1
 void set_square_duty_cycle(struct oscillator& o, uint8_t duty_cycle);
 uint8_t get_noise();
 void copy_channel_sound(struct oscillator& source, struct oscillator& copy);
-void update_channel(struct oscillator& o);
+bool update_channel(struct oscillator& o);
 void silence();
 
 #endif
