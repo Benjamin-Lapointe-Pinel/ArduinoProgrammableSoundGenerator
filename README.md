@@ -8,24 +8,24 @@ void setup()
   init_SID();
 }
 ```
+Play a 440Hz triangle wave for 1 second, then stop.
 ```
 triangle.note = N_A4;
 delay(1000);
 triangle.note = N_NOP;
 ```
-Play a 440Hz triangle wave for 1 second, then stop.
+Play 2 tones at the same time.
 ```
 squares[0].note = N_A4;
 squares[1].note = N_A5;
 ```
-Play 2 tones at the same time.
+Set volume for specific channel to maximum.
 ```
 noise.volume = 15;
 ```
-Set volume for specific channel to maximum.
+Sweep a channel down to low frequency.
 ```
 sawtooth.sweep_direction = SWEEP_DOWN;
 sawtooth.sweep_shift = 1;
 sawtooth.sweep_speed = SWEEP_SPEED(8);
 ```
-Sweep a channel down to low frequency.
