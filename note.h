@@ -123,7 +123,7 @@
 //NES APU max pitch is C11... what a shame...
 //Si le son était mixé hardware (avec les pins)
 //Au lieu de software (avec un pwm)
-//On pourrait surement acceléré d'un certain cran
-//La génération de son et ainsi attaindre des octaves plus haut
+//On pourrait surement accelérer d'un certain cran
+//La génération de son et ainsi atteindre des octaves plus haut
 
 #endif

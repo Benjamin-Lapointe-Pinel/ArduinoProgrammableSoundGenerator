@@ -10,7 +10,7 @@
 
 #include "APSG.h"
 
-oscillator squares[NUMBER_OF_SQUARES];
+oscillator squares[NUMBER_OF_SQUARES]; //rename for square1 & square2
 oscillator triangle;
 oscillator sawtooth;
 oscillator noise;
