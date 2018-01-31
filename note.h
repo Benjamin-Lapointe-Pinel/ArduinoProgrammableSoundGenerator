@@ -103,7 +103,7 @@
 #define N_AS7 17
 #define N_B7  16
 
-//Non precise enough
+//Not precise enough
 #define N_C8  15
 #define N_CS8 14
 #define N_D8  13
@@ -124,6 +124,6 @@
 //Si le son était mixé hardware (avec les pins)
 //Au lieu de software (avec un pwm)
 //On pourrait surement accelérer d'un certain cran
-//La génération de son et ainsi atteindre des octaves plus haut
+//la génération de son et ainsi atteindre des octaves plus haut
 
 #endif

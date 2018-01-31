@@ -249,7 +249,7 @@ ISR(TIMER2_OVF_vect)
 //TODO inline? Optimisation voulu peut-être?... define?
 bool update_channel(struct oscillator& o)
 {
-  if ((o.note >= o.sample_speed) && (o.note <= N_C0))
+  if ((o.note >= o.sample_speed) && (o.note <= N_MAX))
   {
     //Sound generation
     o.frequency -= o.sample_speed;
