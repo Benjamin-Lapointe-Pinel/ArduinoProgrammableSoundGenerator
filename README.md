@@ -31,3 +31,4 @@ sawtooth.sweep_direction = SWEEP_DOWN;
 sawtooth.sweep_shift = 1;
 sawtooth.sweep_speed = SWEEP_SPEED(8);
 ```
+There are other examples in the ino file. For instance, a couple of multichannel melodies. Try them out!
