@@ -3,6 +3,8 @@ An Arduino NES inspired multichannel sounds generator library.
 # How to use it
 Plug a speaker to pin 3, then init the sound generator in the setup function.
 ```
+#include "APSG.h"
+
 void setup()
 {
   init_SID();
